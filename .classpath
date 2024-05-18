@@ -6,8 +6,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/.jar files for sql/slf4j-api-2.0.9.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/.jar files for sql/slf4j-nop-2.0.9.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/.jar files for sql/sqlite-jdbc-3.45.3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/lib/slf4j-api-2.0.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/lib/slf4j-nop-2.0.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mohamed/eclipse-workspace/medicalproject/lib/sqlite-jdbc-3.45.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
