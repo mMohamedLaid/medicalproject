@@ -1,5 +1,5 @@
 # Medical Office Management System
-hope this image works 1:
+hope this image works 2:
 ![Java Project Image Test](images/javaprojectimagetest.PNG)
 
 ## Overview
