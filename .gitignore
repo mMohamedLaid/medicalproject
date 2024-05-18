@@ -91,5 +91,11 @@ local.properties
 hs_err_pid*
 replay_pid*
 
+# Exclude all jars by default
+*.jar
+
+# Except for specific jars you want to include
+!lib/
+!lib/*.jar
+
 # End of https://www.toptal.com/developers/gitignore/api/eclipse,java
-/bin/
