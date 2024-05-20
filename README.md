@@ -3,7 +3,7 @@ hope this image works :
 
 Patients Example :
 
-![patients](images/patient.png)
+![patients](images/patients.png)
 
 Doctors Example :
 
