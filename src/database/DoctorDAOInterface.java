@@ -10,3 +10,4 @@ public interface DoctorDAOInterface {
     void updateDoctor(int doctorId, String firstName, String lastName, String phoneNumber, String specialty);
     void deleteDoctor(int doctorId);
 }
+

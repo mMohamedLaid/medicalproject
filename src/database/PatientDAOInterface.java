@@ -11,3 +11,4 @@ public interface PatientDAOInterface {
     void updatePatient(int patientId, String firstName, String lastName, String phoneNumber, String email) throws SQLException;
     void deletePatient(int patientId);
 }
+

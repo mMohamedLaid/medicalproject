@@ -1,35 +1,39 @@
 package core;
 
-
 public class Doctor extends Person {
-	private String specialty;
-	private boolean isAvailable;
+    private int doctorId;
+    private String email;
+    private String specialty;
 
-	public Doctor(String firstName, String lastName, String phoneNumber, String specialty, boolean isAvailable) {
-		super(firstName, lastName, phoneNumber);
-		this.specialty = specialty;
-		this.isAvailable = isAvailable;
-	}
+    public Doctor(int doctorId, String firstName, String lastName, String phoneNumber, String email, String specialty) {
+        super(firstName, lastName, phoneNumber);
+        this.doctorId = doctorId;
+        this.email = email;
+        this.specialty = specialty;
+    }
 
-	@Override
-	public void displayDetails() {
-		System.out.println("Doctor: " + firstName + " " + lastName + " | Specialty: " + specialty + " | Available: "
-				+ isAvailable);
-	}
+    @Override
+    public void displayDetails() {
+        System.out.println("Doctor: " + firstName + " " + lastName + " | Phone: " + phoneNumber + " | Email: " + email + " | Specialty: " + specialty);
+    }
 
-	public void manageAppointment(Appointment appointment) {
-		System.out.println("Managing appointment for: " + appointment.getPatient().firstName);
-	}
+    public void manageAppointment(Appointment appointment) {
+        System.out.println("Managing appointment for: " + appointment.getPatient().getFirstName());
+    }
 
-	public void consultPatient(Patient patient) {
-		System.out.println("Consulting patient: " + patient.firstName + " " + patient.lastName);
-	}
+    public void consultPatient(Patient patient) {
+        System.out.println("Consulting patient: " + patient.getFirstName() + " " + patient.getLastName());
+    }
 
-	public String getSpecialty() {
-		return specialty;
-	}
+    public int getDoctorId() {
+        return doctorId;
+    }
 
-	public boolean isAvailable() {
-		return isAvailable;
-	}
+    public String getEmail() {
+        return email;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
 }

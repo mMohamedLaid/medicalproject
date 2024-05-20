@@ -37,3 +37,4 @@ public class Consultation {
 		return treatment;
 	}
 }
+

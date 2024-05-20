@@ -55,3 +55,4 @@ public class DatabaseConnection {
         executeSQLFile("setup.sql");
     }
 }
+
