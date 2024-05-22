@@ -3,38 +3,43 @@ package core;
 import java.time.LocalDate;
 
 public class Consultation {
-	private Patient patient;
-	private Doctor doctor;
-	private LocalDate date;
-	private String medicalObservations;
-	private String treatment;
+    private int consultationId;
+    private Patient patient;
+    private Doctor doctor;
+    private LocalDate date;
+    private String diagnosis;
+    private String treatment;
 
-	public Consultation(Patient patient, Doctor doctor, LocalDate date, String medicalObservations, String treatment) {
-		this.patient = patient;
-		this.doctor = doctor;
-		this.date = date;
-		this.medicalObservations = medicalObservations;
-		this.treatment = treatment;
-	}
+    public Consultation(int consultationId, Patient patient, Doctor doctor, LocalDate date, String diagnosis, String treatment) {
+        this.consultationId = consultationId;
+        this.patient = patient;
+        this.doctor = doctor;
+        this.date = date;
+        this.diagnosis = diagnosis;
+        this.treatment = treatment;
+    }
 
-	public Patient getPatient() {
-		return patient;
-	}
+    public int getConsultationId() {
+        return consultationId;
+    }
 
-	public Doctor getDoctor() {
-		return doctor;
-	}
+    public Patient getPatient() {
+        return patient;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public Doctor getDoctor() {
+        return doctor;
+    }
 
-	public String getMedicalObservations() {
-		return medicalObservations;
-	}
+    public LocalDate getDate() {
+        return date;
+    }
 
-	public String getTreatment() {
-		return treatment;
-	}
+    public String getDiagnosis() {
+        return diagnosis;
+    }
+
+    public String getTreatment() {
+        return treatment;
+    }
 }
-

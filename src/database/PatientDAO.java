@@ -113,4 +113,21 @@ public class PatientDAO {
             e.printStackTrace();
         }
     }
+    public boolean exists(String firstName, String lastName, String phoneNumber, String email) {
+        String sql = "SELECT COUNT(*) FROM patients WHERE first_name = ? AND last_name = ? AND phone_number = ? AND email = ?";
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+            pstmt.setString(3, phoneNumber);
+            pstmt.setString(4, email);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

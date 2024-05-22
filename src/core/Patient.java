@@ -61,3 +61,4 @@ public class Patient extends Person {
         return medicalCertificates;
     }
 }
+

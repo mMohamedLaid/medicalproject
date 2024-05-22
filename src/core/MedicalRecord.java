@@ -1,43 +1,46 @@
 package core;
 
-import java.util.List;
-import java.util.ArrayList;
-
 public class MedicalRecord {
-	private Patient patient;
-	private List<Consultation> consultations;
-	private List<String> prescriptions;
-	private List<String> medicalCertificates;
+    private int recordId;
+    private Patient patient;
+    private Consultation consultation;
+    private String prescriptions;
+    private String medicalCertificate;
 
-	public MedicalRecord(Patient patient) {
-		this.patient = patient;
-		this.consultations = new ArrayList<>();
-		this.prescriptions = new ArrayList<>();
-		this.medicalCertificates = new ArrayList<>();
-	}
+    public MedicalRecord(int recordId, Patient patient, Consultation consultation, String prescriptions, String medicalCertificate) {
+        this.recordId = recordId;
+        this.patient = patient;
+        this.consultation = consultation;
+        this.prescriptions = prescriptions;
+        this.medicalCertificate = medicalCertificate;
+    }
 
-	public void addConsultation(Consultation consultation) {
-		consultations.add(consultation);
-	}
+    public int getRecordId() {
+        return recordId;
+    }
 
-	public void addPrescription(String prescription) {
-		prescriptions.add(prescription);
-	}
+    public Patient getPatient() {
+        return patient;
+    }
 
-	public void addMedicalCertificate(String certificate) {
-		medicalCertificates.add(certificate);
-	}
+    public Consultation getConsultation() {
+        return consultation;
+    }
 
-	public List<Consultation> getConsultations() {
-		return consultations;
-	}
+    public String getPrescriptions() {
+        return prescriptions;
+    }
 
-	public List<String> getPrescriptions() {
-		return prescriptions;
-	}
+    public String getMedicalCertificate() {
+        return medicalCertificate;
+    }
 
-	public List<String> getMedicalCertificates() {
-		return medicalCertificates;
-	}
+    public void setPrescriptions(String prescriptions) {
+        this.prescriptions = prescriptions;
+    }
+
+    public void setMedicalCertificate(String medicalCertificate) {
+        this.medicalCertificate = medicalCertificate;
+    }
 }
 

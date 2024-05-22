@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     appointment_id INTEGER PRIMARY KEY AUTOINCREMENT,
     patient_id INTEGER NOT NULL,
     doctor_id INTEGER NOT NULL,
-    appointment_date TEXT NOT NULL,
+    appointment_date DATE NOT NULL,
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
     FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
 );
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS consultations (
     consultation_id INTEGER PRIMARY KEY AUTOINCREMENT,
     patient_id INTEGER NOT NULL,
     doctor_id INTEGER NOT NULL,
-    consultation_date TEXT NOT NULL,
+    consultation_date DATE NOT NULL,
     diagnosis TEXT,
     treatment TEXT,
     FOREIGN KEY (patient_id) REFERENCES patients(patient_id),

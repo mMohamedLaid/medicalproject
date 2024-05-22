@@ -1,7 +1,9 @@
 package gui;
 
 import core.Patient;
+import core.Validator;
 import database.PatientDAO;
+
 import java.util.List;
 
 public class PatientService {
@@ -12,6 +14,10 @@ public class PatientService {
     }
 
     public void addPatient(String firstName, String lastName, String phoneNumber, String email) {
+        if (!Validator.isValidPersonInput(firstName, lastName, phoneNumber, email) ||
+            !Validator.isUniquePatientInput(firstName, lastName, phoneNumber, email)) {
+            throw new IllegalArgumentException("Invalid or duplicate input!");
+        }
         patientDAO.insertPatient(firstName, lastName, phoneNumber, email);
     }
 
@@ -31,3 +37,4 @@ public class PatientService {
         patientDAO.deletePatient(patientId);
     }
 }
+
