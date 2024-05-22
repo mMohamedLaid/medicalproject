@@ -1,5 +1,5 @@
 # Medical Office Management System
-hope this image works (testing) :
+hope this image works  :
 
 Patients Example :
 
@@ -7,7 +7,7 @@ Patients Example :
 
 Doctors Example :
 
-![doctors](images/doctors.png)
+![doctors2](images/doctors2.png)
 ## Overview
 This is a Java-based medical office management system that allows for the organization and automation of a medical office, managing medical records, appointments, and patient files.
 
