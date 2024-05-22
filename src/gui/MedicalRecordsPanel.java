@@ -4,16 +4,17 @@ import core.MedicalRecord;
 import core.Patient;
 import core.Consultation;
 import core.Validator;
+import core.Doctor;
 import database.MedicalRecordDAO;
-import gui.PatientService;
-import gui.ConsultationService;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,49 +22,79 @@ import java.util.stream.Collectors;
 public class MedicalRecordsPanel extends JPanel {
     private JTextField patientIdText;
     private JTextField consultationIdText;
-    private JTextField prescriptionsText;
-    private JTextField medicalCertificateText;
+    private JTextArea prescriptionsText;
+    private JTextArea medicalCertificateText;
     private DefaultTableModel medicalRecordModel;
     private JTable medicalRecordTable;
-    private MedicalRecordDAO medicalRecordDAO;
+    private MedicalRecordService medicalRecordService;
     private Set<Integer> validPatientIds;
     private Set<Integer> validConsultationIds;
 
-    public MedicalRecordsPanel() {
-        this.medicalRecordDAO = new MedicalRecordDAO();
+    public MedicalRecordsPanel(JTabbedPane tabbedPane, PatientsPanel patientsPanel, ConsultationsPanel consultationsPanel) {
+        this.medicalRecordService = new MedicalRecordService();
         this.validPatientIds = new PatientService().getAllPatients().stream().map(Patient::getPatientId).collect(Collectors.toSet());
         this.validConsultationIds = new ConsultationService().getAllConsultations().stream().map(Consultation::getConsultationId).collect(Collectors.toSet());
 
         setLayout(new BorderLayout());
 
-        JPanel medicalRecordInputPanel = new JPanel(new GridLayout(5, 2));
+        JPanel medicalRecordInputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
         add(medicalRecordInputPanel, BorderLayout.NORTH);
 
         JLabel patientIdLabel = new JLabel("Patient ID");
         patientIdText = new JTextField(20);
-        medicalRecordInputPanel.add(patientIdLabel);
-        medicalRecordInputPanel.add(patientIdText);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        medicalRecordInputPanel.add(patientIdLabel, gbc);
+        gbc.gridx = 1;
+        medicalRecordInputPanel.add(patientIdText, gbc);
 
         JLabel consultationIdLabel = new JLabel("Consultation ID");
         consultationIdText = new JTextField(20);
-        medicalRecordInputPanel.add(consultationIdLabel);
-        medicalRecordInputPanel.add(consultationIdText);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        medicalRecordInputPanel.add(consultationIdLabel, gbc);
+        gbc.gridx = 1;
+        medicalRecordInputPanel.add(consultationIdText, gbc);
 
         JLabel prescriptionsLabel = new JLabel("Prescriptions");
-        prescriptionsText = new JTextField(20);
-        medicalRecordInputPanel.add(prescriptionsLabel);
-        medicalRecordInputPanel.add(prescriptionsText);
+        prescriptionsText = new JTextArea(3, 20);
+        prescriptionsText.setLineWrap(true);
+        prescriptionsText.setWrapStyleWord(true);
+        JScrollPane prescriptionsScrollPane = new JScrollPane(prescriptionsText);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        medicalRecordInputPanel.add(prescriptionsLabel, gbc);
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        medicalRecordInputPanel.add(prescriptionsScrollPane, gbc);
 
         JLabel medicalCertificateLabel = new JLabel("Medical Certificate");
-        medicalCertificateText = new JTextField(20);
-        medicalRecordInputPanel.add(medicalCertificateLabel);
-        medicalRecordInputPanel.add(medicalCertificateText);
+        medicalCertificateText = new JTextArea(3, 20);
+        medicalCertificateText.setLineWrap(true);
+        medicalCertificateText.setWrapStyleWord(true);
+        JScrollPane medicalCertificateScrollPane = new JScrollPane(medicalCertificateText);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        medicalRecordInputPanel.add(medicalCertificateLabel, gbc);
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        medicalRecordInputPanel.add(medicalCertificateScrollPane, gbc);
 
         JButton addMedicalRecordButton = new JButton("Add Medical Record");
-        medicalRecordInputPanel.add(addMedicalRecordButton);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        medicalRecordInputPanel.add(addMedicalRecordButton, gbc);
 
         JButton viewMedicalRecordsButton = new JButton("View All Medical Records");
-        medicalRecordInputPanel.add(viewMedicalRecordsButton);
+        gbc.gridy = 5;
+        medicalRecordInputPanel.add(viewMedicalRecordsButton, gbc);
 
         medicalRecordModel = new DefaultTableModel() {
             @Override
@@ -71,7 +102,23 @@ public class MedicalRecordsPanel extends JPanel {
                 return column != 0; // ID is not editable
             }
         };
-        medicalRecordTable = new JTable(medicalRecordModel);
+        medicalRecordTable = new JTable(medicalRecordModel) {
+            @Override
+            public TableCellEditor getCellEditor(int row, int column) {
+                if (column == 3 || column == 4) {
+                    return new TextAreaCellEditor();
+                }
+                return super.getCellEditor(row, column);
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                if (column == 3 || column == 4) {
+                    return new TextAreaCellRenderer();
+                }
+                return super.getCellRenderer(row, column);
+            }
+        };
         medicalRecordModel.addColumn("ID");
         medicalRecordModel.addColumn("Patient ID");
         medicalRecordModel.addColumn("Consultation ID");
@@ -89,6 +136,12 @@ public class MedicalRecordsPanel extends JPanel {
         JMenuItem deleteMedicalRecordItem = new JMenuItem("Delete");
         medicalRecordContextMenu.add(deleteMedicalRecordItem);
 
+        // Right-click "goto" functionality
+        JMenuItem gotoPatientItem = new JMenuItem("Go to Patient");
+        medicalRecordContextMenu.add(gotoPatientItem);
+        JMenuItem gotoConsultationItem = new JMenuItem("Go to Consultation");
+        medicalRecordContextMenu.add(gotoConsultationItem);
+
         medicalRecordTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -100,61 +153,67 @@ public class MedicalRecordsPanel extends JPanel {
             }
         });
 
-        deleteMedicalRecordItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int row = medicalRecordTable.getSelectedRow();
-                if (row != -1) {
-                    int recordId = (int) medicalRecordTable.getValueAt(row, 0);
-                    medicalRecordDAO.deleteMedicalRecord(recordId);
-                    medicalRecordModel.removeRow(row);
-                    JOptionPane.showMessageDialog(null, "Medical record deleted successfully!");
-                }
+        gotoPatientItem.addActionListener(e -> {
+            int row = medicalRecordTable.getSelectedRow();
+            if (row != -1) {
+                int patientId = Integer.parseInt(medicalRecordTable.getValueAt(row, 1).toString());
+                tabbedPane.setSelectedComponent(patientsPanel);
+                patientsPanel.scrollToPatient(patientId);
             }
         });
 
-        addMedicalRecordButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int patientId = Integer.parseInt(patientIdText.getText());
-                    int consultationId = Integer.parseInt(consultationIdText.getText());
-                    String prescriptions = prescriptionsText.getText();
-                    String medicalCertificate = medicalCertificateText.getText();
+        gotoConsultationItem.addActionListener(e -> {
+            int row = medicalRecordTable.getSelectedRow();
+            if (row != -1) {
+                int consultationId = Integer.parseInt(medicalRecordTable.getValueAt(row, 2).toString());
+                tabbedPane.setSelectedComponent(consultationsPanel);
+                consultationsPanel.scrollToConsultation(consultationId);
+            }
+        });
 
-                    if (!Validator.isValidMedicalRecordInput(patientId, consultationId)) {
-                        JOptionPane.showMessageDialog(null, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
+        deleteMedicalRecordItem.addActionListener(e -> {
+            int row = medicalRecordTable.getSelectedRow();
+            if (row != -1) {
+                int recordId = Integer.parseInt(medicalRecordTable.getValueAt(row, 0).toString());
+                medicalRecordService.deleteMedicalRecord(recordId);
+                medicalRecordModel.removeRow(row);
+                JOptionPane.showMessageDialog(null, "Medical record deleted successfully!");
+            }
+        });
 
-                    if (!validPatientIds.contains(patientId) || !validConsultationIds.contains(consultationId)) {
-                        JOptionPane.showMessageDialog(null, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
+        addMedicalRecordButton.addActionListener(e -> {
+            try {
+                int patientId = Integer.parseInt(patientIdText.getText());
+                int consultationId = Integer.parseInt(consultationIdText.getText());
+                String prescriptions = prescriptionsText.getText();
+                String medicalCertificate = medicalCertificateText.getText();
 
-                    Patient patient = new PatientService().getPatientById(patientId);
-                    Consultation consultation = new ConsultationService().getConsultationById(consultationId);
-
-                    MedicalRecord medicalRecord = new MedicalRecord(0, patient, consultation, prescriptions, medicalCertificate);
-                    medicalRecordDAO.insertMedicalRecord(medicalRecord);
-                    JOptionPane.showMessageDialog(null, "Medical record added successfully!");
-                    viewMedicalRecordsButton.doClick(); // Refresh the table
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Invalid input. Please enter valid IDs.", "Error", JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
+                if (!Validator.isValidMedicalRecordInput(patientId, consultationId)) {
                     JOptionPane.showMessageDialog(null, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+
+                if (!validPatientIds.contains(patientId) || !validConsultationIds.contains(consultationId)) {
+                    JOptionPane.showMessageDialog(null, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                MedicalRecord medicalRecord = new MedicalRecord(0, new Patient(patientId, "", "", "", ""), new Consultation(consultationId, new Patient(patientId, "", "", "", ""), new Doctor(consultationId, "", "", "", "", ""), LocalDate.now(), "", ""), prescriptions, medicalCertificate);
+                medicalRecordService.addMedicalRecord(medicalRecord);
+                JOptionPane.showMessageDialog(null, "Medical record added successfully!");
+                viewMedicalRecordsButton.doClick(); // Refresh the table
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Invalid input. Please enter valid IDs.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Invalid input!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        viewMedicalRecordsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                medicalRecordModel.setRowCount(0);  // Clear existing data
-                List<MedicalRecord> medicalRecords = medicalRecordDAO.selectAllMedicalRecords();
-                for (MedicalRecord medicalRecord : medicalRecords) {
-                    medicalRecordModel.addRow(new Object[]{medicalRecord.getRecordId(), medicalRecord.getPatient().getPatientId(), medicalRecord.getConsultation().getConsultationId(), medicalRecord.getPrescriptions(), medicalRecord.getMedicalCertificate()});
-                }
+        viewMedicalRecordsButton.addActionListener(e -> {
+            medicalRecordModel.setRowCount(0);  // Clear existing data
+            List<MedicalRecord> medicalRecords = medicalRecordService.getAllMedicalRecords();
+            for (MedicalRecord medicalRecord : medicalRecords) {
+                medicalRecordModel.addRow(new Object[]{medicalRecord.getRecordId(), medicalRecord.getPatient().getPatientId(), medicalRecord.getConsultation().getConsultationId(), medicalRecord.getPrescriptions(), medicalRecord.getMedicalCertificate()});
             }
         });
 
@@ -194,7 +253,7 @@ public class MedicalRecordsPanel extends JPanel {
         medicalRecordTable.getModel().addTableModelListener(e -> {
             if (e.getType() == TableModelEvent.UPDATE) {
                 int row = e.getFirstRow();
-                int recordId = (int) medicalRecordTable.getValueAt(row, 0);
+                int recordId = Integer.parseInt(medicalRecordTable.getValueAt(row, 0).toString());
                 int patientId;
                 int consultationId;
                 String prescriptions;
@@ -213,11 +272,8 @@ public class MedicalRecordsPanel extends JPanel {
                         return;
                     }
 
-                    Patient patient = new PatientService().getPatientById(patientId);
-                    Consultation consultation = new ConsultationService().getConsultationById(consultationId);
-
-                    MedicalRecord medicalRecord = new MedicalRecord(recordId, patient, consultation, prescriptions, medicalCertificate);
-                    medicalRecordDAO.updateMedicalRecord(medicalRecord);
+                    MedicalRecord medicalRecord = new MedicalRecord(recordId, new Patient(patientId, "", "", "", ""), new Consultation(consultationId, new Patient(patientId, "", "", "", ""), new Doctor(consultationId, "", "", "", "", ""), LocalDate.now(), "", ""), prescriptions, medicalCertificate);
+                    medicalRecordService.updateMedicalRecord(recordId, medicalRecord);
                     JOptionPane.showMessageDialog(null, "Medical record updated successfully!");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Invalid input. Please enter valid IDs.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -228,5 +284,96 @@ public class MedicalRecordsPanel extends JPanel {
                 }
             }
         });
+    }
+
+    class TextAreaCellEditor extends AbstractCellEditor implements TableCellEditor {
+        private JTextArea textArea;
+        private JDialog dialog;
+        private boolean confirmed;
+
+        @Override
+        public Object getCellEditorValue() {
+            return textArea.getText();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            textArea = new JTextArea(value != null ? value.toString() : "");
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new Dimension(400, 200));
+
+            dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(table), "Edit Text", true);
+            dialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+            JPanel buttonPanel = new JPanel();
+            JButton confirmButton = new JButton("Confirm");
+            JButton cancelButton = new JButton("Cancel");
+            buttonPanel.add(confirmButton);
+            buttonPanel.add(cancelButton);
+            dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+            confirmButton.addActionListener(e -> {
+                confirmed = true;
+                dialog.dispose();
+            });
+
+            cancelButton.addActionListener(e -> {
+                confirmed = false;
+                dialog.dispose();
+            });
+
+            dialog.setSize(400, 200);
+            dialog.setLocationRelativeTo(table);
+            dialog.setVisible(true);
+
+            dialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    confirmed = false;
+                }
+            });
+
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+
+            return textArea;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            if (confirmed) {
+                return super.stopCellEditing();
+            } else {
+                cancelCellEditing();
+                return false;
+            }
+        }
+    }
+
+    class TextAreaCellRenderer extends JTextArea implements TableCellRenderer {
+        public TextAreaCellRenderer() {
+            setLineWrap(true);
+            setWrapStyleWord(true);
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText(value != null ? value.toString() : "");
+            setToolTipText(getText().length() > 20 ? getText().substring(0, 20) + "..." : getText());
+            setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
+            String[] lines = getText().split("\n");
+            setText(lines.length > 0 ? lines[0] + (lines.length > 1 ? "..." : "") : "");
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                setForeground(table.getSelectionForeground());
+            } else {
+                setBackground(table.getBackground());
+                setForeground(table.getForeground());
+            }
+            return this;
+        }
     }
 }

@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDate;
@@ -16,9 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-
-
 
 public class ConsultationsPanel extends JPanel {
     private JTextField patientIdText;
@@ -112,7 +110,23 @@ public class ConsultationsPanel extends JPanel {
                 return column != 0; // ID is not editable
             }
         };
-        consultationTable = new JTable(consultationModel);
+        consultationTable = new JTable(consultationModel) {
+            @Override
+            public TableCellEditor getCellEditor(int row, int column) {
+                if (column == 4 || column == 5) {
+                    return new TextAreaCellEditor();
+                }
+                return super.getCellEditor(row, column);
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                if (column == 4 || column == 5) {
+                    return new TextAreaCellRenderer();
+                }
+                return super.getCellRenderer(row, column);
+            }
+        };
         consultationModel.addColumn("ID");
         consultationModel.addColumn("Patient ID");
         consultationModel.addColumn("Doctor ID");
@@ -151,7 +165,7 @@ public class ConsultationsPanel extends JPanel {
         gotoPatientItem.addActionListener(e -> {
             int row = consultationTable.getSelectedRow();
             if (row != -1) {
-                int patientId = (int) consultationTable.getValueAt(row, 1);
+                int patientId = Integer.parseInt(consultationTable.getValueAt(row, 1).toString());
                 tabbedPane.setSelectedComponent(patientsPanel);
                 patientsPanel.scrollToPatient(patientId);
             }
@@ -160,7 +174,7 @@ public class ConsultationsPanel extends JPanel {
         gotoDoctorItem.addActionListener(e -> {
             int row = consultationTable.getSelectedRow();
             if (row != -1) {
-                int doctorId = (int) consultationTable.getValueAt(row, 2);
+                int doctorId = Integer.parseInt(consultationTable.getValueAt(row, 2).toString());
                 tabbedPane.setSelectedComponent(doctorsPanel);
                 doctorsPanel.scrollToDoctor(doctorId);
             }
@@ -169,7 +183,7 @@ public class ConsultationsPanel extends JPanel {
         deleteConsultationItem.addActionListener(e -> {
             int row = consultationTable.getSelectedRow();
             if (row != -1) {
-                int consultationId = (int) consultationTable.getValueAt(row, 0);
+                int consultationId = Integer.parseInt(consultationTable.getValueAt(row, 0).toString());
                 consultationService.deleteConsultation(consultationId);
                 consultationModel.removeRow(row);
                 JOptionPane.showMessageDialog(null, "Consultation deleted successfully!");
@@ -220,7 +234,7 @@ public class ConsultationsPanel extends JPanel {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     int row = consultationTable.getSelectedRow();
                     int column = consultationTable.getSelectedColumn();
-                    if (!consultationTable.isEditing()) {
+                    if (column == 4 || column == 5) {
                         consultationTable.editCellAt(row, column);
                         Component editor = consultationTable.getEditorComponent();
                         if (editor != null) {
@@ -249,7 +263,7 @@ public class ConsultationsPanel extends JPanel {
         consultationTable.getModel().addTableModelListener(e -> {
             if (e.getType() == TableModelEvent.UPDATE) {
                 int row = e.getFirstRow();
-                int consultationId = (int) consultationTable.getValueAt(row, 0);
+                int consultationId = Integer.parseInt(consultationTable.getValueAt(row, 0).toString());
                 int patientId;
                 int doctorId;
                 LocalDate date;
@@ -271,7 +285,7 @@ public class ConsultationsPanel extends JPanel {
                     }
 
                     Consultation consultation = new Consultation(consultationId, new Patient(patientId, "", "", "", ""), new Doctor(doctorId, "", "", "", "", ""), date, diagnosis, treatment);
-                    consultationService.updateConsultation(consultationId,consultation);
+                    consultationService.updateConsultation(consultationId, consultation);
                     JOptionPane.showMessageDialog(null, "Consultation updated successfully!");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(null, "Invalid input. Please enter valid IDs.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -283,5 +297,108 @@ public class ConsultationsPanel extends JPanel {
             }
         });
     }
+
+    class TextAreaCellEditor extends AbstractCellEditor implements TableCellEditor {
+        private JTextArea textArea;
+        private JDialog dialog;
+        private boolean confirmed;
+
+        @Override
+        public Object getCellEditorValue() {
+            return textArea.getText();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            textArea = new JTextArea(value != null ? value.toString() : "");
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new Dimension(400, 200));
+
+            dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(table), "Edit Text", true);
+            dialog.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+            JPanel buttonPanel = new JPanel();
+            JButton confirmButton = new JButton("Confirm");
+            JButton cancelButton = new JButton("Cancel");
+            buttonPanel.add(confirmButton);
+            buttonPanel.add(cancelButton);
+            dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+            confirmButton.addActionListener(e -> {
+                confirmed = true;
+                dialog.dispose();
+            });
+
+            cancelButton.addActionListener(e -> {
+                confirmed = false;
+                dialog.dispose();
+            });
+
+            dialog.setSize(400, 200);
+            dialog.setLocationRelativeTo(table);
+            dialog.setVisible(true);
+
+            dialog.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    confirmed = false;
+                }
+            });
+
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+
+            return textArea;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            if (confirmed) {
+                return super.stopCellEditing();
+            } else {
+                cancelCellEditing();
+                return false;
+            }
+        }
+    }
+
+    class TextAreaCellRenderer extends JTextArea implements TableCellRenderer {
+        public TextAreaCellRenderer() {
+            setLineWrap(true);
+            setWrapStyleWord(true);
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText(value != null ? value.toString() : "");
+            setToolTipText(getText().length() > 20 ? getText().substring(0, 20) + "..." : getText());
+            setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
+            String[] lines = getText().split("\n");
+            setText(lines.length > 0 ? lines[0] + (lines.length > 1 ? "..." : "") : "");
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                setForeground(table.getSelectionForeground());
+            } else {
+                setBackground(table.getBackground());
+                setForeground(table.getForeground());
+            }
+            return this;
+        }
+    }
+    public void scrollToConsultation(int consultationId) {
+        for (int i = 0; i < consultationTable.getRowCount(); i++) {
+            if (Integer.parseInt(consultationTable.getValueAt(i, 0).toString()) == consultationId) {
+                consultationTable.setRowSelectionInterval(i, i);
+                consultationTable.scrollRectToVisible(consultationTable.getCellRect(i, 0, true));
+                break;
+            }
+        }
+    }
+
 }
+
+
 

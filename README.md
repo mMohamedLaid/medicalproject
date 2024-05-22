@@ -1,13 +1,8 @@
 # Medical Office Management System
-hope this image works  :
 
-Patients Example :
+(sir, the powerpoint+conception+report is in the folder with the same name "powerpoint+rapport+conception")
 
-![patients3](images/patients3.png)
 
-Doctors Example :
-
-![doctors2](images/doctors2.png)
 ## Overview
 This is a Java-based medical office management system that allows for the organization and automation of a medical office, managing medical records, appointments, and patient files.
 
