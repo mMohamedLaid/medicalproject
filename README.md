@@ -1,9 +1,9 @@
 # Medical Office Management System
-hope this image works  :
+hope this image works (testing) :
 
 Patients Example :
 
-![patients2](images/patients2.png)
+![patients3](images/patients3.png)
 
 Doctors Example :
 
